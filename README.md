@@ -1,5 +1,9 @@
 # cpp-tui-workshop
 
+<div align="center">
+  <img src=".github/preview.gif" alt="Preview" width="400" />
+</div>
+
 - What is: This is a workshop on making a simple and easy but pretty terminal
   user-interface (TUI) in C++.
 - What for: This is for ACM at CSUF's Spring 2024 Dev Workshop.
