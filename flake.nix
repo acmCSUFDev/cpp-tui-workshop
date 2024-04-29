@@ -5,19 +5,8 @@
 	};
 
 	outputs = { self, nixpkgs, flake-utils }: flake-utils.lib.eachDefaultSystem (system: let
+		pkgs = nixpkgs.legacyPackages.${system};
 		lib = nixpkgs.lib;
-
-		pkgs = nixpkgs.legacyPackages.${system}.extend (self: super: {
-			ftxui = super.ftxui.overrideAttrs (old: {
-				cmakeFlags = [
-					"-DFTXUI_ENABLE_INSTALL=ON"
-					"-DFTXUI_BUILD_EXAMPLES=OFF"
-					"-DFTXUI_BUILD_TESTS=OFF"
-					"-DFTXUI_BUILD_DOCS=OFF"
-					"-DCMAKE_BUILD_TYPE=Release"
-				];
-			});
-		});
 
 		buildInputs = with pkgs; [
 			ftxui # tui
