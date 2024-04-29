@@ -1,4 +1,5 @@
 #include "weather.hpp"
+
 #include <future>
 #include <optional>
 
@@ -126,4 +127,4 @@ auto API::search_location(std::string query)
   });
 }
 
-}; // namespace Weather
+};  // namespace Weather

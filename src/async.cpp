@@ -1,4 +1,5 @@
 #include "async.hpp"
+
 #include <stdexcept>
 
 const std::exception &get_exception(const std::exception_ptr &e) {

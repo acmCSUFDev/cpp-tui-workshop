@@ -1,5 +1,3 @@
-#include "async.hpp"
-#include "weather.hpp"
 #include <exception>
 #include <ftxui/component/captured_mouse.hpp>
 #include <ftxui/component/component.hpp>
@@ -9,6 +7,9 @@
 #include <functional>
 #include <future>
 #include <variant>
+
+#include "async.hpp"
+#include "weather.hpp"
 
 // Normally, `using namespace` is pretty bad, but we're giving ftxui an
 // exception because the API is just so nice!
@@ -39,19 +40,15 @@ int main() {
   auto update_weather = [&] {
     weather_maybe = std::monostate{};
     weather_future = std::async(std::launch::async, [&] {
-      try {
-        // Wait for the weather to be done fetching.
-        auto weather = Weather::API::fetch_weather(currentLocation).get();
+      // Wait for the weather to be done fetching.
+      auto promise = Weather::API::fetch_weather(currentLocation);
+      promise.wait();
 
-        // Emit an event to force the screen to refresh.
-        // PostEvent is thread-safe.
-        screen.PostEvent(Event::Custom);
+      // Emit an event to force the screen to refresh.
+      // PostEvent is thread-safe.
+      screen.PostEvent(Event::Custom);
 
-        return weather;
-      } catch (...) {
-        screen.PostEvent(Event::Custom);
-        std::rethrow_exception(std::current_exception());
-      }
+      return promise.get();
     });
   };
 
@@ -60,30 +57,30 @@ int main() {
 
   auto weather_component = [&]() {
     switch (weather_maybe.index()) {
-    case 0: {
-      return vbox({
-          text("Loading weather data...") | center,
-      });
-    }
-    case 1: {
-      auto weather =
-          *std::get<std::unique_ptr<Weather::Conditions>>(weather_maybe);
-      return vbox({
-          text("Weather in " + weather.location.name) | bold,
-          separatorEmpty(),
-          text("Temperature: " + weather.temperature.as_string()),
-          text("Humidity: " + weather.humidity.as_string()),
-      });
-    }
-    case 2: {
-      return vbox({
-          text("Error loading data:") | bold,
-          text(get_exception_message(
-              std::get<std::exception_ptr>(weather_maybe))),
-      });
-    }
-    default:
-      throw std::runtime_error("Invalid index");
+      case 0: {
+        return vbox({
+            text("Loading weather data...") | center,
+        });
+      }
+      case 1: {
+        auto weather =
+            *std::get<std::unique_ptr<Weather::Conditions>>(weather_maybe);
+        return vbox({
+            text("Weather in " + weather.location.name) | bold,
+            separatorEmpty(),
+            text("Temperature: " + weather.temperature.as_string()),
+            text("Humidity: " + weather.humidity.as_string()),
+        });
+      }
+      case 2: {
+        return vbox({
+            text("Error loading data:") | bold,
+            text(get_exception_message(
+                std::get<std::exception_ptr>(weather_maybe))),
+        });
+      }
+      default:
+        throw std::runtime_error("Invalid index");
     }
   };
 
@@ -133,7 +130,8 @@ int main() {
     }
 
     if (event == Event::Custom) {
-      // If the weather promise is done, then update the weather.
+      // Check if the weather data is ready.
+      weather_future.wait();
       if (weather_future.valid()) {
         try {
           weather_maybe =
@@ -142,6 +140,7 @@ int main() {
           weather_maybe = std::current_exception();
         }
       }
+
       return true;
     }
 

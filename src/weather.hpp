@@ -1,10 +1,10 @@
 #pragma once
 
-#include "async.hpp"
-#include <chrono>
 #include <cpr/api.h>
 #include <cpr/cpr.h>
 #include <cpr/cprtypes.h>
+
+#include <chrono>
 #include <iomanip>
 #include <nlohmann/json.hpp>
 #include <sstream>
@@ -18,8 +18,9 @@ struct Location {
 };
 
 // A quantity with a value and a unit.
-template <typename T = double> class Quantity {
-public:
+template <typename T = double>
+class Quantity {
+ public:
   Quantity(T value, std::string unit) : value(value), unit(unit) {}
   auto as_value() const -> double { return value; }
   auto as_string() const -> const std::string {
@@ -28,7 +29,7 @@ public:
     return ss.str();
   }
 
-private:
+ private:
   T value;
   std::string unit;
 };
@@ -70,20 +71,20 @@ auto search_location(std::string query) -> std::future<std::optional<Location>>;
 
 // Exception thrown when the API returns an unexpected status code.
 class Error : public std::runtime_error {
-public:
+ public:
   int status_code;
 
   Error(int status_code)
       : std::runtime_error(format_message(status_code)),
         status_code(status_code) {}
 
-private:
+ private:
   static auto format_message(int status_code) -> const std::string {
     std::stringstream ss;
     ss << "API returned unexpected status code " << status_code;
     return ss.str();
   };
 };
-}; // namespace API
+};  // namespace API
 
-} // namespace Weather
+}  // namespace Weather
