@@ -5,7 +5,6 @@
 #include <ftxui/component/screen_interactive.hpp>
 #include <ftxui/dom/elements.hpp>
 #include <functional>
-#include <optional>
 
 // Normally, `using namespace` is pretty bad, but we're giving ftxui an
 // exception because the API is just so nice!
@@ -16,7 +15,11 @@ int main() {
   auto screen = ScreenInteractive::Fullscreen();
 
   // The default current location is Fullerton, CA.
-  const Weather::Location currentLocation("Fullerton, CA", 33.8703, -117.9253);
+  const Weather::Location currentLocation{
+      .name = "Fullerton, CA",
+      .timezone = "America/Los_Angeles",
+      .coordinates = std::make_pair(33.8703, -117.9253),
+  };
 
   // Create a wrapper that keeps track of the current weather condition.
   // The wrapper starts off not having a value, and will be updated every time
@@ -35,17 +38,22 @@ int main() {
    */
 
   auto loading_component = [&] {
-    return hbox({
-        text("Loading weather data...") | center,
-    });
+    return weather.has_error()
+               ? vbox({
+                     text("Error loading data:") | bold,
+                     text(std::string(weather.get_error().what())),
+                 })
+               : vbox({
+                     text("Loading weather data...") | center,
+                 });
   };
 
   auto weather_component = [&] {
     return vbox({
         text("Weather in " + currentLocation.name) | bold,
         separatorEmpty(),
-        text("Temperature: " + weather->temperature_string()),
-        text("Humidity: " + weather->humidity_string()),
+        text("Temperature: " + weather->temperature.as_string()),
+        text("Humidity: " + weather->humidity.as_string()),
     });
   };
 
@@ -71,8 +79,12 @@ int main() {
   auto window_body = [&] {
     return vbox({
         separatorEmpty(),
-        weather.has_value() ? weather_component() | center
-                            : loading_component() | center,
+        hbox({
+            separatorEmpty(),
+            weather.has_value() ? weather_component() | center
+                                : loading_component() | center,
+            separatorEmpty(),
+        }),
         separatorEmpty(),
         separator(),
         hbox({

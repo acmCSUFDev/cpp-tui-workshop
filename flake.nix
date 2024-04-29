@@ -14,13 +14,9 @@
 			nlohmann_json # json
 		];
 
-		CXXFLAGS = lib.concatStringsSep " " [
-			"-std=c++20"
-			"-Wall"
-			"-Wextra"
-			"-Werror"
-			"-pedantic"
-		];
+		CXXFLAGS = builtins.replaceStrings
+			["\n"] [" "]
+			(builtins.readFile ./compile_flags.txt);
 	in
 		{
 			devShells.default = pkgs.clangStdenv.mkDerivation rec {
