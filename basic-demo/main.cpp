@@ -8,9 +8,12 @@ using namespace ftxui;
 
 int main() {
   auto interface = [&] {
-    return window(text("Title") | center, vbox({
-                                              text("Hello!!") | center,
-                                          }));
+    return window(text(" Title ") | center | bold,
+                  vbox({
+                      filler(),
+                      text("Hello!!") | center,
+                      filler(),
+                  }));
   };
 
   auto screen = ScreenInteractive::Fullscreen();
