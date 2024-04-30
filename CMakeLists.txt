@@ -5,13 +5,20 @@ project(cpp-tui-workshop LANGUAGES CXX)
 find_package(ftxui REQUIRED)
 find_package(cpr REQUIRED)
 
-file(GLOB_RECURSE SRC_FILES "src/*.cpp")
-add_executable(cpp-tui-workshop ${SRC_FILES})
-target_include_directories(cpp-tui-workshop PRIVATE src)
+function(register_executable TARGET_NAME SRC_PATH LIBRARIES)
+	file(GLOB_RECURSE SRC_FILES "${SRC_PATH}/*.cpp")
+	add_executable("${TARGET_NAME}.out" ${SRC_FILES})
+	target_link_libraries("${TARGET_NAME}.out" ${LIBRARIES})
+endfunction()
 
-target_link_libraries(cpp-tui-workshop
-  PRIVATE ftxui::screen
-  PRIVATE ftxui::dom
-  PRIVATE ftxui::component
-  PRIVATE cpr::cpr
+register_executable(
+	"weather-app"
+	"weather-app"
+	"ftxui::screen;ftxui::dom;ftxui::component;cpr::cpr"
+)
+
+register_executable(
+	"basic-demo"
+	"basic-demo"
+	"ftxui::screen;ftxui::dom;ftxui::component"
 )

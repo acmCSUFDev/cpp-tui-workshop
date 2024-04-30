@@ -34,13 +34,20 @@
 
 				installPhase = ''
 					mkdir -p $out/bin
-					mv cpp-tui-workshop $out/bin
+					for bin in *.out; do
+						dst="$out/bin/$(basename $bin .out)"
+						mv $bin $dst
+					done
 				'';
-
-				meta = {
-					mainProgram = "cpp-tui-workshop";
-				};
 			};
+
+			apps = builtins.listToAttrs (map (exe: {
+				name = exe;
+				value = {
+					type = "app";
+					program = "${self.packages.${system}.default}/bin/${exe}";
+				};
+			}) ["weather-app" "basic-demo"]);
 		}
 	);
 }

@@ -21,6 +21,16 @@ using [CMake](https://cmake.org/).
 nix build .#
 ```
 
+This gives you a `result` folder containing the binaries in `result/bin`.
+
+If you want to directly run the program without running the build command, you
+can do:
+
+```sh
+nix run .#weather-app
+nix run .#basic-demo
+```
+
 To run, you can either use `nix run` and skip building entirely or run
 `./result/bin/cpp-tui-workshop`.
 
@@ -40,4 +50,4 @@ cmake .
 cmake --build .
 ```
 
-To run, you can run `./cpp-tui-workshop`.
+To run, you can run any of the `.out` files.

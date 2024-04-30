@@ -131,7 +131,6 @@ int main() {
 
     if (event == Event::Custom) {
       // Check if the weather data is ready.
-      weather_future.wait();
       if (weather_future.valid()) {
         try {
           weather_maybe =
@@ -139,9 +138,11 @@ int main() {
         } catch (...) {
           weather_maybe = std::current_exception();
         }
+        return true;
+      } else if (weather_maybe.index() == 0) {
+        // Data is still loading. Try again later.
+        screen.PostEvent(Event::Custom);
       }
-
-      return true;
     }
 
     return false;
